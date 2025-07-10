@@ -225,7 +225,7 @@ const UserSubscriptions = () => {
           
           <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50">
             <CardContent className="p-6">
-              <h4 font-semibold text-white mb-2">What payment methods do you accept?</h4>
+              <h4 className="font-semibold text-white mb-2">What payment methods do you accept?</h4>
               <p className="text-slate-400 text-sm">We accept all major credit cards, UPI, and digital wallets. All payments are secure and encrypted.</p>
             </CardContent>
           </Card>
