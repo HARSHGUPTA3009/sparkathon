@@ -4,14 +4,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Forecasts from "./pages/Forecasts";
-import Leftovers from "./pages/Leftovers";
-import Subscriptions from "./pages/Subscriptions";
-import Layout from "./components/Layout";
+import { UserAuthProvider } from "./contexts/UserAuthContext";
+import { UserProtectedRoute } from "./components/UserProtectedRoute";
+import UserLogin from "./pages/user/Login";
+import UserDashboard from "./pages/user/Dashboard";
+import UserHistory from "./pages/user/History";
+import UserSubscriptions from "./pages/user/Subscriptions";
+import UserLayout from "./components/UserLayout";
+import EcoBot from "./components/EcoBot";
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -21,29 +21,29 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
+      <UserAuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<UserLogin />} />
             <Route
               path="/*"
               element={
-                <ProtectedRoute>
-                  <Layout>
+                <UserProtectedRoute>
+                  <UserLayout>
                     <Routes>
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/forecasts" element={<Forecasts />} />
-                      <Route path="/leftovers" element={<Leftovers />} />
-                      <Route path="/subscriptions" element={<Subscriptions />} />
+                      <Route path="/dashboard" element={<UserDashboard />} />
+                      <Route path="/history" element={<UserHistory />} />
+                      <Route path="/subscriptions" element={<UserSubscriptions />} />
                     </Routes>
-                  </Layout>
-                </ProtectedRoute>
+                    <EcoBot />
+                  </UserLayout>
+                </UserProtectedRoute>
               }
             />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
+      </UserAuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
