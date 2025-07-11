@@ -14,13 +14,173 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      login_history: {
+        Row: {
+          id: string
+          ip_address: string | null
+          login_time: string
+          provider: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          provider?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          provider?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "login_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meals: {
+        Row: {
+          co2_saved: number | null
+          created_at: string
+          id: string
+          meal_date: string
+          meal_type: string
+          opted_in: boolean
+          taken: boolean | null
+          updated_at: string
+          user_id: string | null
+          wasted: boolean | null
+        }
+        Insert: {
+          co2_saved?: number | null
+          created_at?: string
+          id?: string
+          meal_date?: string
+          meal_type: string
+          opted_in?: boolean
+          taken?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+          wasted?: boolean | null
+        }
+        Update: {
+          co2_saved?: number | null
+          created_at?: string
+          id?: string
+          meal_date?: string
+          meal_type?: string
+          opted_in?: boolean
+          taken?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+          wasted?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          notifications_enabled: boolean | null
+          theme: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notifications_enabled?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notifications_enabled?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          provider: string | null
+          provider_id: string | null
+          role: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          provider?: string | null
+          provider_id?: string | null
+          role?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          provider?: string | null
+          provider_id?: string | null
+          role?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      log_user_login: {
+        Args: {
+          p_user_id: string
+          p_ip_address?: string
+          p_user_agent?: string
+          p_provider?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

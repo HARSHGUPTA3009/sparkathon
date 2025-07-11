@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Leaf, Lock, UserRound } from 'lucide-react';
+import { Leaf, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const UserLogin = () => {
@@ -14,6 +14,7 @@ const UserLogin = () => {
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, createPassword, hasPassword } = useUserAuth();
 
@@ -80,28 +81,19 @@ const UserLogin = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500/20 rounded-full mb-4">
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500/20 rounded-full mb-4 animate-pulse">
             <Leaf className="w-8 h-8 text-emerald-400" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">EcoMess</h1>
-          <p className="text-slate-400">Your personal eco-impact tracker</p>
+          <h1 className="text-3xl font-bold text-white mb-2 animate-slide-up">EcoMess</h1>
+          <p className="text-slate-400 animate-slide-up animation-delay-200">Your personal eco-impact tracker</p>
         </div>
 
-        <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50 shadow-2xl">
+        <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50 shadow-2xl animate-slide-up animation-delay-300">
           <CardHeader className="text-center">
             <CardTitle className="text-white flex items-center justify-center gap-2">
-              {!hasPassword ? (
-                <>
-                  <UserRound className="w-5 h-5" />
-                  Create Your Account
-                </>
-              ) : (
-                <>
-                  <Lock className="w-5 h-5" />
-                  Welcome Back
-                </>
-              )}
+              <Lock className="w-5 h-5" />
+              {!hasPassword ? 'Create Your Account' : 'Welcome Back'}
             </CardTitle>
             <CardDescription className="text-slate-400">
               {!hasPassword 
@@ -115,31 +107,46 @@ const UserLogin = () => {
               <form onSubmit={handleCreatePassword} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="newPassword" className="text-slate-300">Create Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Choose a secure password"
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Choose a secure password"
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400 transition-colors pr-10"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-slate-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-slate-400" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-slate-300">Confirm Password</Label>
                   <Input
                     id="confirmPassword"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm your password"
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400"
+                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400 transition-colors"
                     required
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-105"
                 >
                   Create Account & Start! 🌱
                 </Button>
@@ -154,37 +161,53 @@ const UserLogin = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter your username"
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400"
+                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400 transition-colors"
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-slate-300">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400 transition-colors pr-10"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-slate-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-slate-400" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-300 transform hover:scale-105"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Signing in...' : 'Sign In & Continue! 🌿'}
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Signing in...
+                    </div>
+                  ) : (
+                    'Sign In & Continue! 🌿'
+                  )}
                 </Button>
               </form>
             )}
-            
-            <div className="mt-6 p-4 bg-emerald-900/20 rounded-lg">
-              <p className="text-xs text-emerald-300 text-center">
-                🌍 Demo: user1 / anshubhess
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
