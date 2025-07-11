@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               id: profile.id,
               email: profile.email,
               username: profile.username,
-              role: profile.role,
+              role: profile.role as 'admin' | 'user', // Type assertion to fix the error
               avatar_url: profile.avatar_url
             });
           }

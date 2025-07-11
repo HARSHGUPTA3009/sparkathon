@@ -11,7 +11,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
 
   const navigation = [
@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={logout}
+                onClick={signOut}
                 className="text-slate-300 hover:text-red-400 hover:bg-slate-800"
               >
                 <LogOut className="w-4 h-4" />
