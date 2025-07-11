@@ -38,20 +38,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user) {
           // Fetch user profile from our custom users table
-          const { data: profile } = await supabase
+          const { data: profile, error } = await supabase
             .from('users')
             .select('*')
             .eq('id', session.user.id)
             .single();
           
-          if (profile) {
+          if (profile && !error) {
             setUser({
               id: profile.id,
               email: profile.email,
               username: profile.username,
-              role: profile.role as 'admin' | 'user', // Type assertion to fix the error
+              role: profile.role as 'admin' | 'user',
               avatar_url: profile.avatar_url
             });
+          } else {
+            console.error('Error fetching user profile:', error);
           }
           
           // Log the login

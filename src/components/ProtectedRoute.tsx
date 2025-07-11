@@ -22,10 +22,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   if (requiredRole && user?.role !== requiredRole) {
+    // If user is not admin but trying to access admin area, redirect to admin login
+    if (requiredRole === 'admin') {
+      return <Navigate to="/admin/login" replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
