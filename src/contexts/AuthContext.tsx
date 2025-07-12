@@ -9,6 +9,7 @@ interface AuthUser {
   username?: string;
   role: 'admin' | 'user';
   avatar_url?: string;
+  first_login?: boolean;
 }
 
 interface AuthContextType {
@@ -19,6 +20,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, username?: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
   isAuthenticated: boolean;
 }
 
@@ -37,56 +39,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         
         if (session?.user) {
-          try {
-            // Fetch user profile from our custom users table
-            const { data: profile, error } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-            
-            if (profile && !error) {
-              setUser({
-                id: profile.id,
-                email: profile.email,
-                username: profile.username,
-                role: profile.role as 'admin' | 'user',
-                avatar_url: profile.avatar_url
-              });
-              console.log('User profile loaded:', profile.email, 'Role:', profile.role);
-            } else {
-              console.error('Error fetching user profile:', error);
-              // Fallback: create user from auth data if profile doesn't exist
-              setUser({
-                id: session.user.id,
-                email: session.user.email || '',
-                role: session.user.email === 'anshu@ecomess.com' || session.user.email === 'harsh@ecomess.com' ? 'admin' : 'user'
-              });
+          // Create user object from session
+          const authUser: AuthUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
+            role: session.user.user_metadata?.role || 
+                  (session.user.email && ['anshu@ecomess.com', 'harsh@ecomess.com'].includes(session.user.email) ? 'admin' : 'user'),
+            avatar_url: session.user.user_metadata?.avatar_url,
+            first_login: session.user.user_metadata?.first_login
+          };
+          
+          setUser(authUser);
+          console.log('User authenticated:', authUser.email, 'Role:', authUser.role);
+          
+          // Try to create/update user profile in our users table (non-blocking)
+          setTimeout(async () => {
+            try {
+              await supabase
+                .from('users')
+                .upsert({
+                  id: session.user.id,
+                  email: session.user.email || '',
+                  username: authUser.username,
+                  role: authUser.role,
+                  provider: session.user.app_metadata?.provider || 'email',
+                  avatar_url: authUser.avatar_url
+                }, { onConflict: 'id' });
+            } catch (error) {
+              console.log('Note: Could not sync user profile to database:', error);
             }
-            
-            // Log the login
-            if (event === 'SIGNED_IN') {
-              setTimeout(async () => {
-                try {
-                  const { error } = await supabase.rpc('log_user_login', {
-                    p_user_id: session.user.id,
-                    p_ip_address: null,
-                    p_user_agent: navigator.userAgent,
-                    p_provider: session.user.app_metadata?.provider || 'email'
-                  });
-                  
-                  if (error) {
-                    console.error('Error logging user login:', error);
-                  }
-                } catch (loginLogError) {
-                  console.error('Error logging user login:', loginLogError);
-                }
-              }, 0);
-            }
-          } catch (error) {
-            console.error('Error in auth state change handler:', error);
-            setUser(null);
-          }
+          }, 0);
         } else {
           setUser(null);
         }
@@ -98,7 +81,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session check:', session?.user?.email);
-      // This will trigger the auth state change listener above
       if (!session) {
         setLoading(false);
       }
@@ -117,11 +99,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Sign in error:', error);
-      } else {
-        console.log('Sign in successful for:', email);
+        return { error };
       }
       
-      return { error };
+      console.log('Sign in successful for:', email);
+      return { error: null };
     } catch (error) {
       console.error('Unexpected sign in error:', error);
       return { error: error as Error };
@@ -130,18 +112,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, username?: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             username: username || email.split('@')[0],
+            role: ['anshu@ecomess.com', 'harsh@ecomess.com'].includes(email) ? 'admin' : 'user',
+            first_login: true
           }
         }
       });
-      return { error };
+      
+      if (error) {
+        console.error('Sign up error:', error);
+        return { error };
+      }
+      
+      console.log('Sign up successful for:', email);
+      return { error: null };
     } catch (error) {
+      console.error('Unexpected sign up error:', error);
       return { error: error as Error };
     }
   };
@@ -153,6 +145,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         options: {
           redirectTo: `${window.location.origin}/dashboard`
         }
+      });
+      return { error };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: newPassword,
+        data: { first_login: false }
       });
       return { error };
     } catch (error) {
@@ -173,6 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signUp,
       signInWithGoogle,
       signOut,
+      updatePassword,
       isAuthenticated: !!session?.user,
     }}>
       {children}

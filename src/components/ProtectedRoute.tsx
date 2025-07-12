@@ -1,6 +1,8 @@
 
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
+import PasswordUpdateModal from './PasswordUpdateModal';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,6 +14,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRole 
 }) => {
   const { isAuthenticated, user, loading } = useAuth();
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   if (loading) {
     return (
@@ -33,5 +36,18 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/dashboard" replace />;
   }
 
-  return <>{children}</>;
+  // Check if user needs to update password on first login
+  if (user?.first_login && !showPasswordModal) {
+    setShowPasswordModal(true);
+  }
+
+  return (
+    <>
+      {children}
+      <PasswordUpdateModal 
+        isOpen={showPasswordModal} 
+        onClose={() => setShowPasswordModal(false)} 
+      />
+    </>
+  );
 };

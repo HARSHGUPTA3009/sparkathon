@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Leaf, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Leaf, Lock, Eye, EyeOff, AlertCircle, UserPlus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const Login = () => {
@@ -14,7 +14,9 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, isAuthenticated, loading } = useAuth();
+  const [isSignUpMode, setIsSignUpMode] = useState(false);
+  const [username, setUsername] = useState('');
+  const { signIn, signUp, isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
@@ -33,35 +35,73 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log('Login attempt for:', email);
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        console.error('Login error details:', error);
+      if (isSignUpMode) {
+        console.log('Sign up attempt for:', email);
+        const { error } = await signUp(email, password, username);
         
-        let errorMessage = "Please check your credentials and try again.";
-        
-        if (error.message.includes('Invalid login credentials')) {
-          errorMessage = "Invalid email or password. Please check your credentials.";
-        } else if (error.message.includes('Database error')) {
-          errorMessage = "Database connection issue. Please try again in a moment.";
-        } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = "Please check your email and click the confirmation link.";
+        if (error) {
+          console.error('Sign up error:', error);
+          let errorMessage = "Unable to create account. Please try again.";
+          
+          if (error.message.includes('already registered')) {
+            errorMessage = "An account with this email already exists. Try signing in instead.";
+            setIsSignUpMode(false);
+          } else if (error.message.includes('weak password')) {
+            errorMessage = "Password is too weak. Please use at least 6 characters.";
+          } else if (error.message.includes('invalid email')) {
+            errorMessage = "Please enter a valid email address.";
+          }
+          
+          toast({
+            title: "Sign up failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Account created! 🎉",
+            description: "Please check your email to verify your account.",
+          });
         }
-        
-        toast({
-          title: "Sign in failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
       } else {
-        toast({
-          title: "Welcome back! 🌿",
-          description: "Successfully signed in to EcoMess Admin",
-        });
+        console.log('Sign in attempt for:', email);
+        const { error } = await signIn(email, password);
+        
+        if (error) {
+          console.error('Sign in error:', error);
+          let errorMessage = "Please check your credentials and try again.";
+          
+          if (error.message.includes('Invalid login credentials')) {
+            errorMessage = "Invalid email or password.";
+          } else if (error.message.includes('Email not confirmed')) {
+            errorMessage = "Please check your email and click the confirmation link.";
+          } else if (error.message.includes('Too many requests')) {
+            errorMessage = "Too many login attempts. Please wait a moment and try again.";
+          }
+          
+          toast({
+            title: "Sign in failed",
+            description: errorMessage,
+            variant: "destructive",
+            action: (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsSignUpMode(true)}
+              >
+                Sign Up Instead
+              </Button>
+            ),
+          });
+        } else {
+          toast({
+            title: "Welcome back! 🌿",
+            description: "Successfully signed in to EcoMess Admin",
+          });
+        }
       }
     } catch (error) {
-      console.error('Unexpected login error:', error);
+      console.error('Unexpected error:', error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -88,25 +128,30 @@ const Login = () => {
         <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50 shadow-2xl animate-slide-up animation-delay-300">
           <CardHeader className="text-center">
             <CardTitle className="text-white flex items-center justify-center gap-2">
-              <Lock className="w-5 h-5" />
-              Admin Login
+              {isSignUpMode ? <UserPlus className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+              {isSignUpMode ? 'Create Admin Account' : 'Admin Login'}
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Sign in to access the admin dashboard
+              {isSignUpMode 
+                ? "Create a new admin account to access the dashboard"
+                : "Sign in to access the admin dashboard"
+              }
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Quick Login Helper */}
-            <div className="bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm font-medium text-emerald-400">Admin Credentials</span>
+            {/* Admin Credentials Helper - Only show for login */}
+            {!isSignUpMode && (
+              <div className="bg-slate-700/30 p-3 rounded-lg border border-slate-600/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm font-medium text-emerald-400">Existing Admin Accounts</span>
+                </div>
+                <div className="text-xs text-slate-300 space-y-1">
+                  <div>📧 anshu@ecomess.com</div>
+                  <div>📧 harsh@ecomess.com</div>
+                </div>
               </div>
-              <div className="text-xs text-slate-300 space-y-1">
-                <div>📧 anshu@ecomess.com | 🔑 kuchupuchu21</div>
-                <div>📧 harsh@ecomess.com | 🔑 legend30</div>
-              </div>
-            </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -121,6 +166,20 @@ const Login = () => {
                   required
                 />
               </div>
+
+              {isSignUpMode && (
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-slate-300">Username (Optional)</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Choose a username"
+                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400 transition-colors"
+                  />
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-slate-300">Password</Label>
@@ -130,9 +189,10 @@ const Login = () => {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter admin password"
+                    placeholder={isSignUpMode ? "Create a secure password" : "Enter admin password"}
                     className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-emerald-400 transition-colors pr-10"
                     required
+                    minLength={isSignUpMode ? 6 : undefined}
                   />
                   <Button
                     type="button"
@@ -158,12 +218,26 @@ const Login = () => {
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Signing In...
+                    {isSignUpMode ? 'Creating Account...' : 'Signing In...'}
                   </div>
                 ) : (
-                  'Sign In to Admin 🔐'
+                  isSignUpMode ? 'Create Admin Account 🎉' : 'Sign In to Admin 🔐'
                 )}
               </Button>
+
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="text-slate-400 hover:text-white"
+                  onClick={() => setIsSignUpMode(!isSignUpMode)}
+                >
+                  {isSignUpMode 
+                    ? 'Already have an account? Sign in'
+                    : 'Need an account? Sign up'
+                  }
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
