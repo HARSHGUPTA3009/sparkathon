@@ -66,15 +66,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             // Log the login
             if (event === 'SIGNED_IN') {
-              setTimeout(() => {
-                supabase.rpc('log_user_login', {
-                  p_user_id: session.user.id,
-                  p_ip_address: null,
-                  p_user_agent: navigator.userAgent,
-                  p_provider: session.user.app_metadata?.provider || 'email'
-                }).catch(error => {
-                  console.error('Error logging user login:', error);
-                });
+              setTimeout(async () => {
+                try {
+                  const { error } = await supabase.rpc('log_user_login', {
+                    p_user_id: session.user.id,
+                    p_ip_address: null,
+                    p_user_agent: navigator.userAgent,
+                    p_provider: session.user.app_metadata?.provider || 'email'
+                  });
+                  
+                  if (error) {
+                    console.error('Error logging user login:', error);
+                  }
+                } catch (loginLogError) {
+                  console.error('Error logging user login:', loginLogError);
+                }
               }, 0);
             }
           } catch (error) {
