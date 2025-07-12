@@ -1,77 +1,94 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface User {
+interface UserAuthUser {
+  id: string;
   username: string;
+  email: string;
+  role: 'user';
 }
 
 interface UserAuthContextType {
-  user: User | null;
+  user: UserAuthUser | null;
   login: (username: string, password: string) => boolean;
   logout: () => void;
-  isAuthenticated: boolean;
   createPassword: (password: string) => void;
+  isAuthenticated: boolean;
   hasPassword: boolean;
 }
 
 const UserAuthContext = createContext<UserAuthContextType | undefined>(undefined);
 
-const DEMO_USER = {
-  username: 'user1',
-  password: 'anshubhess'
-};
+// Hardcoded users
+const HARDCODED_USERS = [
+  { id: 'user1', username: 'userA', email: 'userA@ecomess.com', password: '12345', role: 'user' as const },
+  { id: 'user2', username: 'userB', email: 'userB@ecomess.com', password: '12345', role: 'user' as const },
+  { id: 'user3', username: 'userC', email: 'userC@ecomess.com', password: '12345', role: 'user' as const },
+];
 
 export const UserAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasPassword, setHasPassword] = useState(false);
+  const [user, setUser] = useState<UserAuthUser | null>(null);
+  const [hasPassword, setHasPassword] = useState(true); // Always true since we have hardcoded users
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('mess-user');
-    const savedPassword = localStorage.getItem('mess-user-password');
-    
-    if (savedUser && savedPassword) {
-      setUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
-      setHasPassword(true);
-    } else if (savedPassword) {
-      setHasPassword(true);
+    // Check for existing session in localStorage
+    const savedUser = localStorage.getItem('ecomess-user-auth');
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('ecomess-user-auth');
+      }
     }
   }, []);
 
-  const createPassword = (password: string) => {
-    localStorage.setItem('mess-user-password', password);
-    setHasPassword(true);
-  };
-
-  const login = (username: string, password: string): boolean => {
-    const savedPassword = localStorage.getItem('mess-user-password');
+  const login = (usernameOrEmail: string, password: string): boolean => {
+    console.log('Attempting login with:', usernameOrEmail, password);
     
-    if (username === DEMO_USER.username && 
-        (password === DEMO_USER.password || password === savedPassword)) {
-      const userData = { username };
-      setUser(userData);
-      setIsAuthenticated(true);
-      localStorage.setItem('mess-user', JSON.stringify(userData));
-      return true;
+    const foundUser = HARDCODED_USERS.find(u => 
+      (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password
+    );
+    
+    console.log('Found user:', foundUser);
+    
+    if (!foundUser) {
+      return false;
     }
-    return false;
+
+    const authUser: UserAuthUser = {
+      id: foundUser.id,
+      username: foundUser.username,
+      email: foundUser.email,
+      role: foundUser.role
+    };
+
+    setUser(authUser);
+    localStorage.setItem('ecomess-user-auth', JSON.stringify(authUser));
+    
+    return true;
   };
 
   const logout = () => {
     setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('mess-user');
+    localStorage.removeItem('ecomess-user-auth');
+  };
+
+  const createPassword = (password: string) => {
+    // This is a placeholder for the password creation flow
+    // Since we're using hardcoded users, this doesn't actually create anything
+    console.log('Password creation called with:', password);
   };
 
   return (
-    <UserAuthContext.Provider value={{ 
-      user, 
-      login, 
-      logout, 
-      isAuthenticated, 
-      createPassword, 
-      hasPassword 
+    <UserAuthContext.Provider value={{
+      user,
+      login,
+      logout,
+      createPassword,
+      isAuthenticated: !!user,
+      hasPassword,
     }}>
       {children}
     </UserAuthContext.Provider>
