@@ -4,6 +4,7 @@ import path from "path";
 
 
 export default defineConfig(({ mode }) => ({
+   base: "/",
   server: {
     host: "::",
     port: 8080,
