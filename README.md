@@ -1,73 +1,116 @@
-# Welcome to your Lovable project
+# 🌱 Sparkathon
 
-## Project info
+**Ignite Innovation, Transform Ideas into Impact**
 
-**URL**: https://lovable.dev/projects/39b89b27-caea-4360-9727-240b3e01ef27
+A scalable, full-stack e-commerce platform designed to combat food waste. Built with React, TypeScript, and Tailwind CSS, Sparkathon empowers communities and businesses to list, share, and purchase surplus food efficiently—enabling a more sustainable world.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## ✨ Features
 
-**Use Lovable**
+- 🛍 **Marketplace** for surplus or expiring food items  
+- 👤 **User Roles**: Separate interfaces for Admins & Users  
+- 🔐 **Secure Authentication** with role-based access  
+- 🧩 **Reusable Component Library** with consistent design system  
+- 🔄 **Real-time Inventory** using Supabase for live sync  
+- 📦 **Modern Stack** with Vite, TypeScript, Tailwind, and more  
+- ♻️ **Mission-driven**: Reduce food waste, support communities  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/39b89b27-caea-4360-9727-240b3e01ef27) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Tech Stack
 
-**Use your preferred IDE**
+Built with the tools and technologies you love:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS  
+- **Forms & Validation**: React Hook Form, Zod  
+- **State Management**: Context API, Supabase  
+- **Auth**: Supabase Auth with Role-Based Access Control (RBAC)  
+- **Tooling**: ESLint, Prettier, PostCSS, Autoprefixer  
+- **Package Management**: npm  
+- **Testing**: Vitest / Jest  
+- **Configuration**: JSON, TOML, Markdown  
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 📁 Table of Contents
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- [Features](#-features)  
+- [Tech Stack](#-tech-stack)  
+- [Getting Started](#-getting-started)  
+- [Installation](#-installation)  
+- [Usage](#-usage)  
+- [Testing](#-testing)  
+- [Contributing](#-contributing)  
+- [License](#-license)  
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📦 Getting Started
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Prerequisites
+
+- **Node.js** (v16+ recommended)  
+- **npm** (v8+ recommended)
+
+---
+
+## 🛠 Installation
+
+```bash
+git clone https://github.com/HARSHGUPTA3009/sparkathon
+cd sparkathon
+npm install
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## ▶️ Usage
 
-**Use GitHub Codespaces**
+```bash
+npm start
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🧪 Testing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+npm test
+```
 
-## How can I deploy this project?
+Supports **Vitest** or **Jest** depending on your setup.
 
-Simply open [Lovable](https://lovable.dev/projects/39b89b27-caea-4360-9727-240b3e01ef27) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 👥 Roles & Access
 
-Yes, you can!
+### 👤 Admin
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Approve or reject listings  
+- Manage user accounts  
+- View analytics and reports  
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### 🛒 User
+
+- Browse and purchase surplus food  
+- Post available food items for redistribution  
+- Manage profile and order history  
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository  
+2. Create your feature branch: `git checkout -b feature/my-feature`  
+3. Commit your changes: `git commit -m 'Add my feature'`  
+4. Push to the branch: `git push origin feature/my-feature`  
+5. Open a pull request  
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
