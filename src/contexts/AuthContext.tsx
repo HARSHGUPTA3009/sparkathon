@@ -37,35 +37,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         
         if (session?.user) {
-          // Fetch user profile from our custom users table
-          const { data: profile, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (profile && !error) {
-            setUser({
-              id: profile.id,
-              email: profile.email,
-              username: profile.username,
-              role: profile.role as 'admin' | 'user',
-              avatar_url: profile.avatar_url
-            });
-          } else {
-            console.error('Error fetching user profile:', error);
-          }
-          
-          // Log the login
-          if (event === 'SIGNED_IN') {
-            setTimeout(() => {
-              supabase.rpc('log_user_login', {
-                p_user_id: session.user.id,
-                p_ip_address: null,
-                p_user_agent: navigator.userAgent,
-                p_provider: session.user.app_metadata?.provider || 'email'
+          try {
+            // Fetch user profile from our custom users table
+            const { data: profile, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            
+            if (profile && !error) {
+              setUser({
+                id: profile.id,
+                email: profile.email,
+                username: profile.username,
+                role: profile.role as 'admin' | 'user',
+                avatar_url: profile.avatar_url
               });
-            }, 0);
+              console.log('User profile loaded:', profile.email, 'Role:', profile.role);
+            } else {
+              console.error('Error fetching user profile:', error);
+              // Fallback: create user from auth data if profile doesn't exist
+              setUser({
+                id: session.user.id,
+                email: session.user.email || '',
+                role: session.user.email === 'anshu@ecomess.com' || session.user.email === 'harsh@ecomess.com' ? 'admin' : 'user'
+              });
+            }
+            
+            // Log the login
+            if (event === 'SIGNED_IN') {
+              setTimeout(() => {
+                supabase.rpc('log_user_login', {
+                  p_user_id: session.user.id,
+                  p_ip_address: null,
+                  p_user_agent: navigator.userAgent,
+                  p_provider: session.user.app_metadata?.provider || 'email'
+                }).catch(error => {
+                  console.error('Error logging user login:', error);
+                });
+              }, 0);
+            }
+          } catch (error) {
+            console.error('Error in auth state change handler:', error);
+            setUser(null);
           }
         } else {
           setUser(null);
@@ -77,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
       // This will trigger the auth state change listener above
       if (!session) {
         setLoading(false);
@@ -88,12 +103,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting sign in for:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      
+      if (error) {
+        console.error('Sign in error:', error);
+      } else {
+        console.log('Sign in successful for:', email);
+      }
+      
       return { error };
     } catch (error) {
+      console.error('Unexpected sign in error:', error);
       return { error: error as Error };
     }
   };
