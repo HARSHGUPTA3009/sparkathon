@@ -33,7 +33,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (requiredRole === 'admin') {
       return <Navigate to="/admin/login" replace />;
     }
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Check if user needs to update password on first login

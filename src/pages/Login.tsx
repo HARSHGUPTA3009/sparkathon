@@ -14,7 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, isAuthenticated, loading } = useAuth();
+  const { signIn, isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -24,12 +24,23 @@ const Login = () => {
     );
   }
 
-  if (isAuthenticated) {
+  // Redirect if already authenticated as admin
+  if (isAuthenticated && user?.role === 'admin') {
     return <Navigate to="/admin/dashboard" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast({
+        title: "Missing credentials",
+        description: "Please enter both email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -38,7 +49,7 @@ const Login = () => {
       if (error) {
         toast({
           title: "Sign in failed",
-          description: "Invalid credentials. Please try again.",
+          description: error.message,
           variant: "destructive",
         });
       } else {
@@ -46,6 +57,7 @@ const Login = () => {
           title: "Welcome back! 🌿",
           description: "Successfully signed in to EcoMess Admin",
         });
+        // Navigation will happen automatically due to the redirect above
       }
     } catch (error) {
       toast({

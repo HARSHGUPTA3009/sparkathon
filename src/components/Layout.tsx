@@ -15,10 +15,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
-    { name: 'Forecasts', href: '/forecasts', icon: TrendingUp },
-    { name: 'Leftovers', href: '/leftovers', icon: Package },
-    { name: 'Subscriptions', href: '/subscriptions', icon: CreditCard },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: BarChart3 },
+    { name: 'Forecasts', href: '/admin/forecasts', icon: TrendingUp },
+    { name: 'Leftovers', href: '/admin/leftovers', icon: Package },
+    { name: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
   ];
 
   const isActive = (href: string) => location.pathname === href;
@@ -32,7 +32,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <Leaf className="h-8 w-8 text-emerald-400" />
-                <span className="ml-2 text-xl font-bold text-white">Smart Mess Manager</span>
+                <span className="ml-2 text-xl font-bold text-white">Admin Panel</span>
               </div>
               
               {/* Desktop Navigation */}
@@ -59,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* User Menu */}
             <div className="flex items-center space-x-4">
-              <span className="text-slate-300 text-sm">Welcome, {user?.username}</span>
+              <span className="text-slate-300 text-sm">Admin: {user?.username}</span>
               <Button
                 variant="ghost"
                 size="sm"

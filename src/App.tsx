@@ -16,6 +16,9 @@ import UserHistory from "./pages/user/History";
 import UserSubscriptions from "./pages/user/Subscriptions";
 import UserLayout from "./components/UserLayout";
 import Dashboard from "./pages/Dashboard";
+import Forecasts from "./pages/Forecasts";
+import Leftovers from "./pages/Leftovers";
+import Subscriptions from "./pages/Subscriptions";
 import Layout from "./components/Layout";
 import EcoBot from "./components/EcoBot";
 import "./index.css";
@@ -42,6 +45,9 @@ const App = () => (
                         <Routes>
                           <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
                           <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/forecasts" element={<Forecasts />} />
+                          <Route path="/leftovers" element={<Leftovers />} />
+                          <Route path="/subscriptions" element={<Subscriptions />} />
                         </Routes>
                       </Layout>
                     </ProtectedRoute>

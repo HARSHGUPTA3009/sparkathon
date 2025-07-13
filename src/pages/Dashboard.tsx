@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { TrendingUp, TrendingDown, Users, Package, Car, TreePine, Zap, Award } from 'lucide-react';
+import { localStorageService } from '@/services/localStorageService';
 import Confetti from 'react-confetti';
 
 const Dashboard = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
+  const [adminStats, setAdminStats] = useState(localStorageService.getAdminStats());
 
   useEffect(() => {
     const updateWindowDimensions = () => {
@@ -17,10 +19,17 @@ const Dashboard = () => {
     updateWindowDimensions();
     window.addEventListener('resize', updateWindowDimensions);
     
+    // Load fresh data
+    setAdminStats(localStorageService.getAdminStats());
+    
     return () => window.removeEventListener('resize', updateWindowDimensions);
   }, []);
 
-  // Simulated data
+  // Calculate real stats from stored data
+  const forecasts = localStorageService.getForecasts();
+  const leftovers = localStorageService.getLeftovers();
+  const subscriptions = localStorageService.getSubscriptions();
+
   const optOutData = [
     { name: 'Opted In', value: 35, color: '#ef4444' },
     { name: 'Opted Out', value: 65, color: '#10b981' }
@@ -36,15 +45,10 @@ const Dashboard = () => {
     { day: 'Sun', optOut: 41, co2Saved: 35 }
   ];
 
-  const leftoverData = [
-    { day: 'Mon', amount: 12 },
-    { day: 'Tue', amount: 8 },
-    { day: 'Wed', amount: 5 },
-    { day: 'Thu', amount: 7 },
-    { day: 'Fri', amount: 4 },
-    { day: 'Sat', amount: 15 },
-    { day: 'Sun', amount: 18 }
-  ];
+  const leftoverData = leftovers.slice(0, 7).map(entry => ({
+    day: new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short' }),
+    amount: entry.quantity
+  }));
 
   const handleMilestoneClick = () => {
     setShowConfetti(true);
@@ -53,32 +57,32 @@ const Dashboard = () => {
 
   const stats = [
     {
-      title: 'Students Opted Out Today',
-      value: '65%',
+      title: 'Total Users',
+      value: adminStats.totalUsers.toString(),
       change: '+12%',
       trend: 'up',
       icon: Users,
       color: 'text-emerald-400'
     },
     {
-      title: 'Weekly CO₂ Saved',
-      value: '341 kg',
+      title: 'Active Subscriptions',
+      value: subscriptions.filter(s => s.status === 'active').length.toString(),
       change: '+8.3%',
       trend: 'up',
       icon: TreePine,
       color: 'text-green-400'
     },
     {
-      title: 'Leftover Reduction',
-      value: '43%',
+      title: 'Total Forecasts',
+      value: forecasts.length.toString(),
       change: '+15%',
       trend: 'up',
       icon: Package,
       color: 'text-blue-400'
     },
     {
-      title: 'Energy Saved',
-      value: '2.4 MWh',
+      title: 'Total Revenue',
+      value: `₹${adminStats.totalRevenue.toLocaleString()}`,
       change: '+6.2%',
       trend: 'up',
       icon: Zap,
@@ -101,8 +105,8 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Eco Impact Dashboard 🌍</h1>
-          <p className="text-slate-400">Real-time sustainability metrics for mess management</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard 🎛️</h1>
+          <p className="text-slate-400">Monitor and manage the EcoMess system</p>
         </div>
         <div 
           className="cursor-pointer"
@@ -111,7 +115,7 @@ const Dashboard = () => {
           <div className="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center gap-2 text-white font-semibold">
               <Award className="w-5 h-5" />
-              65% Opt-out Goal Achieved! 🎉
+              System Running Smoothly! 🎉
             </div>
           </div>
         </div>
@@ -152,9 +156,9 @@ const Dashboard = () => {
         {/* Opt-out Pie Chart */}
         <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50">
           <CardHeader>
-            <CardTitle className="text-white">Today's Opt-out Status</CardTitle>
+            <CardTitle className="text-white">System Status Overview</CardTitle>
             <CardDescription className="text-slate-400">
-              Students choosing sustainable options
+              Current operational metrics
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -202,9 +206,9 @@ const Dashboard = () => {
         {/* Weekly Trend */}
         <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50">
           <CardHeader>
-            <CardTitle className="text-white">Weekly Sustainability Trend</CardTitle>
+            <CardTitle className="text-white">Weekly Performance Trend</CardTitle>
             <CardDescription className="text-slate-400">
-              Opt-out rates and CO₂ savings over time
+              System efficiency and sustainability metrics
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -245,33 +249,48 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Impact Equivalents */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-gradient-to-br from-emerald-900/50 to-green-900/50 backdrop-blur-md border-emerald-700/50">
+      {/* Recent Activity Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-gradient-to-br from-blue-900/50 to-indigo-900/50 backdrop-blur-md border-blue-700/50">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-500/20 rounded-full">
-                <Car className="w-8 h-8 text-emerald-400" />
+              <div className="p-3 bg-blue-500/20 rounded-full">
+                <TrendingUp className="w-8 h-8 text-blue-400" />
               </div>
               <div>
-                <p className="text-emerald-100 text-lg">This week's saved CO₂ equals</p>
-                <p className="text-2xl font-bold text-white">~120 km of driving avoided 🚗</p>
-                <p className="text-emerald-300 text-sm">Based on 341 kg CO₂ saved</p>
+                <p className="text-blue-100 text-lg">Latest Forecasts</p>
+                <p className="text-2xl font-bold text-white">{forecasts.length} predictions</p>
+                <p className="text-blue-300 text-sm">Active monitoring</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-900/50 to-emerald-900/50 backdrop-blur-md border-green-700/50">
+        <Card className="bg-gradient-to-br from-orange-900/50 to-red-900/50 backdrop-blur-md border-orange-700/50">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-500/20 rounded-full">
-                <TreePine className="w-8 h-8 text-green-400" />
+              <div className="p-3 bg-orange-500/20 rounded-full">
+                <Package className="w-8 h-8 text-orange-400" />
               </div>
               <div>
-                <p className="text-green-100 text-lg">Environmental impact</p>
-                <p className="text-2xl font-bold text-white">~8 trees worth of CO₂ absorbed 🌳</p>
-                <p className="text-green-300 text-sm">Equivalent annual tree absorption</p>
+                <p className="text-orange-100 text-lg">Leftover Tracking</p>
+                <p className="text-2xl font-bold text-white">{leftovers.length} entries</p>
+                <p className="text-orange-300 text-sm">Waste management</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 backdrop-blur-md border-purple-700/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-purple-500/20 rounded-full">
+                <Users className="w-8 h-8 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-purple-100 text-lg">User Subscriptions</p>
+                <p className="text-2xl font-bold text-white">{subscriptions.length} accounts</p>
+                <p className="text-purple-300 text-sm">Revenue management</p>
               </div>
             </div>
           </CardContent>
@@ -279,39 +298,41 @@ const Dashboard = () => {
       </div>
 
       {/* Leftover Trends */}
-      <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50">
-        <CardHeader>
-          <CardTitle className="text-white">Daily Leftover Quantities</CardTitle>
-          <CardDescription className="text-slate-400">
-            Tracking food waste reduction over the week (kg)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={leftoverData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                <XAxis dataKey="day" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #475569',
-                    borderRadius: '8px',
-                    color: '#f1f5f9'
-                  }}
-                />
-                <Bar 
-                  dataKey="amount" 
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
-                  name="Leftovers (kg)"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {leftoverData.length > 0 && (
+        <Card className="bg-slate-800/50 backdrop-blur-md border-slate-700/50">
+          <CardHeader>
+            <CardTitle className="text-white">Recent Leftover Trends</CardTitle>
+            <CardDescription className="text-slate-400">
+              Food waste tracking over recent entries (kg)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={leftoverData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                  <XAxis dataKey="day" stroke="#94a3b8" />
+                  <YAxis stroke="#94a3b8" />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: '#1e293b',
+                      border: '1px solid #475569',
+                      borderRadius: '8px',
+                      color: '#f1f5f9'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="amount" 
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                    name="Leftovers (kg)"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

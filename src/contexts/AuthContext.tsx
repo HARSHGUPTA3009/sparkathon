@@ -44,7 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
+        // Validate that the parsed user has required properties and is an admin
+        if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.role === 'admin') {
+          setUser(parsedUser);
+        } else {
+          console.error('Invalid saved user data or user is not admin');
+          localStorage.removeItem('ecomess-auth-user');
+        }
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('ecomess-auth-user');
@@ -55,10 +61,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
+      setLoading(true);
+      
       const foundUser = HARDCODED_USERS.find(u => u.email === email && u.password === password);
       
       if (!foundUser) {
+        setLoading(false);
         return { error: new Error('Invalid email or password') };
+      }
+
+      // Check if user has admin role
+      if (foundUser.role !== 'admin') {
+        setLoading(false);
+        return { error: new Error('Access denied. Admin credentials required.') };
       }
 
       const authUser: AuthUser = {
@@ -71,9 +86,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(authUser);
       localStorage.setItem('ecomess-auth-user', JSON.stringify(authUser));
+      setLoading(false);
       
       return { error: null };
     } catch (error) {
+      setLoading(false);
       return { error: error as Error };
     }
   };
