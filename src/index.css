@@ -9,7 +9,9 @@ html, body {
   min-height: 100%;
   overscroll-behavior: none;
 }
-
+html {
+  scroll-behavior: smooth;
+}
 
 @layer base {
   :root {
