@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  background: linear-gradient(to bottom right, #0f172a, #1e293b, #064e3b); /* matching your gradient */
+  min-height: 100%;
+  overscroll-behavior: none;
+}
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;
