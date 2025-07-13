@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AuthUser {
@@ -24,11 +23,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Hardcoded users
 const HARDCODED_USERS = [
-  // Admin users
   { id: 'admin1', email: 'anshu@adminecomess.com', password: '12345678', username: 'anshu', role: 'admin' as const },
   { id: 'admin2', email: 'harsh@adminecomess.com', password: '12345678', username: 'harsh', role: 'admin' as const },
   { id: 'admin3', email: 'vishwas@adminecomess.com', password: '12345678', username: 'vishwas', role: 'admin' as const },
-  // Regular users
   { id: 'user1', email: 'userA@ecomess.com', password: '12345', username: 'userA', role: 'user' as const },
   { id: 'user2', email: 'userB@ecomess.com', password: '12345', username: 'userB', role: 'user' as const },
   { id: 'user3', email: 'userC@ecomess.com', password: '12345', username: 'userC', role: 'user' as const },
@@ -39,38 +36,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session in localStorage
-    const savedUser = localStorage.getItem('ecomess-auth-user');
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        // Validate that the parsed user has required properties and is an admin
-        if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.role === 'admin') {
-          setUser(parsedUser);
-        } else {
-          console.error('Invalid saved user data or user is not admin');
-          localStorage.removeItem('ecomess-auth-user');
-        }
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('ecomess-auth-user');
-      }
-    }
+    // ✅ Always clear saved user on load
+    localStorage.removeItem('ecomess-auth-user');
     setLoading(false);
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      
       const foundUser = HARDCODED_USERS.find(u => u.email === email && u.password === password);
-      
       if (!foundUser) {
         setLoading(false);
         return { error: new Error('Invalid email or password') };
       }
 
-      // Check if user has admin role
       if (foundUser.role !== 'admin') {
         setLoading(false);
         return { error: new Error('Access denied. Admin credentials required.') };
@@ -87,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(authUser);
       localStorage.setItem('ecomess-auth-user', JSON.stringify(authUser));
       setLoading(false);
-      
+
       return { error: null };
     } catch (error) {
       setLoading(false);
@@ -96,7 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, username?: string) => {
-    // For this hardcoded system, signup is not allowed
     return { error: new Error('Registration is not available. Please contact administrator.') };
   };
 
@@ -104,13 +82,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) {
       return { error: new Error('No user logged in') };
     }
-
-    // In a real system, you'd update the password in the backend
-    // For this localStorage system, we'll just update the first_login flag
     const updatedUser = { ...user, first_login: false };
     setUser(updatedUser);
     localStorage.setItem('ecomess-auth-user', JSON.stringify(updatedUser));
-    
     return { error: null };
   };
 
